@@ -3,7 +3,7 @@ include("src/GTAPinJulia.jl")
 using .GTAPinJulia
 
 #   Choose a database and model options
-True = False
+True = false
 if True
     inFolder    = "Data/DBUG0"
     BaseName    = "DBUG0"
