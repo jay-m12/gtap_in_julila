@@ -1,6 +1,7 @@
 include("src/GTAPinJulia.jl")
 
 using .GTAPinJulia
+using JuMP
 
 #   Choose a database and model options
 True = false
@@ -65,4 +66,14 @@ GTAPinJulia.set_attribute(GTAPModel, "cumulative_iteration_limit", 10_000)
 GTAPinJulia.optimize!(GTAPModel)
 
 #   Include the output functions
-#include("src/reporting.jl")
+include("src/reporting.jl")
+using CSV, DataFrames
+
+acts = data[:acts] 
+result_df = name_of_operation(GTAPModel, data, 2025)
+
+println(result_df)
+display(result_df)
+
+CSV.write("GTAP_results.csv", result_df)
+println("Results saved to GTAP_results.csv")
