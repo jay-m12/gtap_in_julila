@@ -1,6 +1,9 @@
 include("src/GTAPinJulia.jl")
 
 using .GTAPinJulia
+using CSV
+using DataFrames
+using JuMP
 
 #   Choose a database and model options
 True = false
@@ -17,12 +20,12 @@ else
     resName     = :USA
     capName     = :CAP
     nrsFact     = [:xxx]
-    savfClosure = :capFix
+    savfClosure = :capFix 
 end
 inscale  = 1e-6
 popscale = 1e-3
 
-#   Get the GTAP data, initialize the model variables and calibrate the model parameters
+#   Get the GTAP data, initialize the model variables and calibrate the model parametersㅣㅐ
 data = GTAPinJulia.load_gtap_data(; inFolder = inFolder, BaseName = BaseName, 
                                     inscale = inscale, popscale = popscale, resName = resName, 
                                     capName = capName, nrsFact = nrsFact)
@@ -61,8 +64,30 @@ GTAPinJulia.fix.(GTAPModel[:pnum], 1.0; force=true)
 # Benchmark
 GTAPinJulia.fix(GTAPModel[:pnum], 1; force=true)
 
-GTAPinJulia.set_attribute(GTAPModel, "cumulative_iteration_limit", 10_000)
+# GTAPinJulia.set_attribute(GTAPModel, "cumulative_iteration_limit", 10_000)
+# GTAPinJulia.set_optimizer_attribute(GTAPModel, "unbounded_check", false)  # EAGO Solver
 GTAPinJulia.optimize!(GTAPModel)
 
-#   Include the output functions
-#include("src/reporting.jl")
+# Include the output functions
+include("src/reporting.jl")
+
+# intln(names(GTAPinJulia))
+
+println(GTAPModel)
+
+# GTAPModel의 변수 값 추출
+results = []
+
+for var in all_variables(GTAPModel)
+    value = JuMP.value(var)  # 최적화된 변수 값 추출
+    if value !== nothing  # 값이 존재하는 경우만 처리
+        push!(results, (variable=string(var), value=value))
+    end
+end
+
+# DataFrame으로 변환
+df = DataFrame(results)
+
+# CSV 파일로 저장
+CSV.write("GTAP_results.csv", df)
+println("Results saved to GTAP_results.csv")
