@@ -1,4 +1,4 @@
-#GTAP model coded in Julia
+## GTAP model coded in Julia
 
 
 PATHSolver.jl is licensed under the MIT License.
